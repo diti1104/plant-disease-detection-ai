@@ -1,12 +1,12 @@
 import streamlit as st
+import tensorflow as tf
 import numpy as np
 from PIL import Image
-from keras.models import load_model
 
-# Load trained model
-model = load_model("plant_disease_model.h5")
+# Load model
+model = tf.keras.models.load_model("plant_disease_model.h5")
 
-# Class names (dataset classes)
+# Class names (PlantVillage sample classes)
 class_names = [
     "Apple___Apple_scab",
     "Apple___Black_rot",
@@ -38,18 +38,19 @@ file = st.file_uploader("Upload leaf image", type=["jpg", "png", "jpeg"])
 if file is not None:
 
     image = Image.open(file)
-    st.image(image, caption="Uploaded Image", use_container_width=True)
+    st.image(image, caption="Uploaded Image", use_column_width=True)
 
     # Preprocess image
     img = image.resize((224,224))
     img = np.array(img) / 255.0
     img = np.expand_dims(img, axis=0)
 
-    # Prediction
+    # Predict
     prediction = model.predict(img)
 
     class_index = np.argmax(prediction)
-    confidence = float(np.max(prediction)) * 100
+    confidence = np.max(prediction) * 100
+
     disease_name = class_names[class_index]
 
     st.success(f"Predicted Disease: {disease_name}")
